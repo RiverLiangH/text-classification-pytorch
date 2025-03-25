@@ -123,9 +123,9 @@ def evaluate(test_loader, model, label2idx, device=None, save_model_path=None, i
 if __name__ == "__main__":
     set_random_seed(seed=2022)
 
-    label_path = 'dataset/TNEWS/labels.json'
-    train_corpus_path = 'dataset/TNEWS/train.json'
-    dev_corpus_path = 'dataset/TNEWS/dev.json'
+    label_path = '/content/text-classification-pytorch/dataset/TNEWS/labels.json'
+    train_corpus_path = '/content/text-classification-pytorch/dataset/TNEWS/train.json'
+    dev_corpus_path = '/content/text-classification-pytorch/dataset/TNEWS/dev.json'
 
     labels_list =read_labels(label_path)
     train_corpus = read_corpus(train_corpus_path)      # train: 53360
