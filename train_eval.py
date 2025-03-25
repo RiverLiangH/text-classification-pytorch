@@ -155,7 +155,7 @@ if __name__ == "__main__":
                     seq_len=20, dropout=0.3, n_labels=len(label2idx)).to(device)
     # model = Bert(bert_model_path, labels_list).to(device)
 
-    train(train_loader, dev_loader, model, epoch=1, loss_func=loss_func, device=device, is_bert_model=True)
+    train(train_loader, dev_loader, model, epoch=1, loss_func=loss_func, device=device, is_bert_model=False)
 
-    res = evaluate(test_loader, model, label2idx, device, save_model_path='checkpoint.pt', is_bert_model=True)
+    res = evaluate(test_loader, model, label2idx, device, save_model_path='checkpoint.pt', is_bert_model=False)
     print(res)
