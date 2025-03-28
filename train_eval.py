@@ -20,7 +20,7 @@ from sklearn.model_selection import train_test_split
 
 
 def train(train_loader, dev_loader, model, epoch, loss_func, device=None, is_bert_model=False):
-    optimizer = torch.optim.Adam(model.parameters(), lr=5e-3, weight_decay=1e-2)
+    optimizer = torch.optim.Adam(model.parameters(), lr=1e-3, weight_decay=1e-2)
     early_stopping = EarlyStopping(patience=2, verbose=False)
 
     for i in trange(epoch, desc='Epoch'):

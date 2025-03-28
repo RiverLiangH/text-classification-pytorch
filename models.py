@@ -91,7 +91,8 @@ class TextRNN(nn.Module):
     def forward(self, x):
         embed = self.embedding(x)
         lstm_out, _ = self.lstm(embed)          # (batch, seq_len, hidden_size)
-        output = lstm_out[:, -1, :]             # 取最后时刻作为输出: (batch, hidden_size)
+        # output = lstm_out[:, -1, :]             # 取最后时刻作为输出: (batch, hidden_size)
+        output = torch.mean(lstm_out, dim=1)  # 取所有时间步的平均
         output = self.linear(output)            # (batch, n_labels)
         return output
 
