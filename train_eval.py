@@ -154,6 +154,14 @@ if __name__ == "__main__":
     model = TextCNN(filter_size=[2, 3, 4], n_filters=100, vocab_size=len(vocab2idx), embed_size=200,
                     seq_len=20, dropout=0.3, n_labels=len(label2idx)).to(device)
     # model = Bert(bert_model_path, labels_list).to(device)
+    # model = TextRNN(vocab_size=len(vocab2idx), embed_size=200, hidden_size=256,
+    #                 seq_len=20, dropout=0.3, n_labels=len(label2idx)).to(device)
+    # model = TextRCNN(vocab_size=len(vocab2idx), embed_size=200, hidden_size=256,
+    #                 seq_len=20, dropout=0.3, n_labels=len(label2idx)).to(device)
+    # model = TextRNNAttention(vocab_size=len(vocab2idx), embed_size=200, hidden_size=256,
+    #                 seq_len=20, dropout=0.3, n_labels=len(label2idx)).to(device)
+    # model = TextDPCNN(vocab_size=len(vocab2idx), embed_size=200, n_filters=100,
+    #                   seq_len=20, dropout=0.3, n_labels=len(label2idx)).to(device)
 
     train(train_loader, dev_loader, model, epoch=1, loss_func=loss_func, device=device, is_bert_model=False)
 
