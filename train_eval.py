@@ -13,6 +13,10 @@ from transformers import BertModel, BertTokenizer
 from utils import EarlyStopping, CommonModelDataset, BertModelDataset
 from utils import get_dataloader, read_labels, read_corpus, get_vocab, get_label2idx, set_random_seed
 from models import Bert, TextCNN, TextRNN, TextRCNN, TextRNNAttention, TextDPCNN
+import json
+from collections import defaultdict
+from sklearn.model_selection import train_test_split
+
 
 
 def train(train_loader, dev_loader, model, epoch, loss_func, device=None, is_bert_model=False):
@@ -134,8 +138,28 @@ if __name__ == "__main__":
 
     dev_data = read_corpus(dev_corpus_path)           # len: 10000
     np.random.shuffle(dev_data)
-    dev_corpus = dev_data[:8000]                      # dev: 8000
-    test_corpus = dev_data[8000: ]                    # test: 2000
+    # dev_corpus = dev_data[:8000]                      # dev: 8000
+    # test_corpus = dev_data[8000: ]                    # test: 2000
+    # 按类别存储数据
+    label_to_data = defaultdict(list)
+    for item in dev_data:
+        label_to_data[item["label"].strip()].append(item)
+
+    # 进行 8:2 的均匀划分
+    dev_corpus, test_corpus = [], []
+    random_state = 42  # 固定随机种子，确保每次划分结果一致
+
+    for label, items in label_to_data.items():
+        train_items, test_items = train_test_split(items, test_size=0.2, random_state=random_state)
+        dev_corpus.extend(train_items)
+        test_corpus.extend(test_items)
+
+    # 打乱数据以防止类别集中在一起
+    np.random.seed(random_state)
+    np.random.shuffle(dev_corpus)
+    np.random.shuffle(test_corpus)
+
+    print(f"Dev Set Size: {len(dev_corpus)}, Test Set Size: {len(test_corpus)}")
 
     train_params = {"batch_size":32, "shuffle":True}
     dev_params = {"batch_size":32, "shuffle":False}
@@ -155,11 +179,11 @@ if __name__ == "__main__":
                     seq_len=20, dropout=0.3, n_labels=len(label2idx)).to(device)
     # model = Bert(bert_model_path, labels_list).to(device)
     # model = TextRNN(vocab_size=len(vocab2idx), embed_size=200, hidden_size=256,
-    #                 seq_len=20, dropout=0.3, n_labels=len(label2idx)).to(device)
+    #                 dropout=0.3, n_labels=len(label2idx)).to(device)
     # model = TextRCNN(vocab_size=len(vocab2idx), embed_size=200, hidden_size=256,
     #                 seq_len=20, dropout=0.3, n_labels=len(label2idx)).to(device)
     # model = TextRNNAttention(vocab_size=len(vocab2idx), embed_size=200, hidden_size=256,
-    #                 seq_len=20, dropout=0.3, n_labels=len(label2idx)).to(device)
+    #                 dropout=0.3, n_labels=len(label2idx)).to(device)
     # model = TextDPCNN(vocab_size=len(vocab2idx), embed_size=200, n_filters=100,
     #                   seq_len=20, dropout=0.3, n_labels=len(label2idx)).to(device)
 
