@@ -187,7 +187,7 @@ if __name__ == "__main__":
     # model = TextDPCNN(vocab_size=len(vocab2idx), embed_size=200, n_filters=100,
     #                   seq_len=20, dropout=0.3, n_labels=len(label2idx)).to(device)
 
-    train(train_loader, dev_loader, model, epoch=15, loss_func=loss_func, device=device, is_bert_model=False)
+    train(train_loader, dev_loader, model, epoch=5, loss_func=loss_func, device=device, is_bert_model=False)
 
     res = evaluate(test_loader, model, label2idx, device, save_model_path='checkpoint.pt', is_bert_model=False)
     print(res)

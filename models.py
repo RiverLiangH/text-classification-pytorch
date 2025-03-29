@@ -78,23 +78,47 @@ class TextCNN(nn.Module):
         return out
 
 
+# class TextRNN(nn.Module):
+#     def __init__(self, vocab_size, embed_size, hidden_size, dropout=None, n_labels=None):
+#         super(TextRNN, self).__init__()
+#         self.model_name = 'text_rnn'
+#         if hidden_size % 2 != 0:
+#             raise ValueError('LSTM的维度:{}不是偶数，需要设置为偶数'.format(hidden_size))
+#         self.embedding = nn.Embedding(vocab_size, embed_size)
+#         self.lstm = nn.LSTM(embed_size, hidden_size//2, num_layers=1, batch_first=True, bidirectional=True)
+#         self.linear = nn.Linear(hidden_size, n_labels)
+#
+#     def forward(self, x):
+#         embed = self.embedding(x)
+#         lstm_out, _ = self.lstm(embed)          # (batch, seq_len, hidden_size)
+#         # output = lstm_out[:, -1, :]             # 取最后时刻作为输出: (batch, hidden_size)
+#         output = torch.mean(lstm_out, dim=1)  # 取所有时间步的平均
+#         output = self.linear(output)            # (batch, n_labels)
+#         return output
+
 class TextRNN(nn.Module):
-    def __init__(self, vocab_size, embed_size, hidden_size, dropout=None, n_labels=None):
+    def __init__(self, vocab_size, embed_size, hidden_size, dropout=0.5, n_labels=None):
         super(TextRNN, self).__init__()
-        self.model_name = 'text_rnn'
-        if hidden_size % 2 != 0:
-            raise ValueError('LSTM的维度:{}不是偶数，需要设置为偶数'.format(hidden_size))
         self.embedding = nn.Embedding(vocab_size, embed_size)
-        self.lstm = nn.LSTM(embed_size, hidden_size//2, num_layers=1, batch_first=True, bidirectional=True)
+        self.lstm = nn.LSTM(embed_size, hidden_size // 2, num_layers=2, batch_first=True, bidirectional=True, dropout=dropout)
+        self.ln = nn.LayerNorm(hidden_size)  # 归一化
+        self.dropout = nn.Dropout(dropout)
         self.linear = nn.Linear(hidden_size, n_labels)
 
-    def forward(self, x):
+    def forward(self, x, seq_lens=None):
         embed = self.embedding(x)
-        lstm_out, _ = self.lstm(embed)          # (batch, seq_len, hidden_size)
-        # output = lstm_out[:, -1, :]             # 取最后时刻作为输出: (batch, hidden_size)
-        output = torch.mean(lstm_out, dim=1)  # 取所有时间步的平均
-        output = self.linear(output)            # (batch, n_labels)
+        if seq_lens is not None:
+            embed = pack_padded_sequence(embed, seq_lens, batch_first=True, enforce_sorted=False)
+        lstm_out, _ = self.lstm(embed)
+        if seq_lens is not None:
+            lstm_out, _ = pad_packed_sequence(lstm_out, batch_first=True)
+        output = torch.mean(lstm_out, dim=1)  # 取平均
+        output = self.ln(output)  # 归一化
+        output = torch.tanh(output)  # 非线性变换
+        output = self.dropout(output)
+        output = self.linear(output)  # 线性层
         return output
+
 
 
 class TextRCNN(nn.Module):
